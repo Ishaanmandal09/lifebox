@@ -3,12 +3,20 @@ import { motion } from "framer-motion";
 import Footer from "../components/Footer";
 import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
+
 function Home() {
   const [showPopup, setShowPopup] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    setShowPopup(true);
+    // Check if the popup has already been shown in this session
+    const hasSeenPopup = sessionStorage.getItem("hasSeenPopup");
+
+    if (!hasSeenPopup) {
+      setShowPopup(true);
+      // Store the flag so it won't show again on returning to Home
+      sessionStorage.setItem("hasSeenPopup", "true");
+    }
   }, []);
 
   return (
@@ -99,7 +107,8 @@ function Home() {
                 width: "380px",
                 textAlign: "center",
                 position: "relative",
-                boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                boxShadow:
+                  "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
               }}
             >
               {/* Close Button */}
@@ -149,11 +158,18 @@ function Home() {
                   lineHeight: "1.5",
                 }}
               >
-                Sign in or create an account to start tracking your belongings effortlessly.
+                Sign in or create an account to start tracking your belongings
+                effortlessly.
               </p>
 
               {/* Redirect Action Buttons */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                }}
+              >
                 <button
                   onClick={() => navigate("/login")}
                   style={{

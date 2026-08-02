@@ -25,13 +25,16 @@ function Dashboard() {
       return;
     }
 
+    // Fetch items belonging to the user
     const { data, error } = await supabase
       .from("item")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
-    if (!error) {
+    if (error) {
+      console.error("Error fetching items:", error.message);
+    } else {
       setItems(data);
     }
 
@@ -99,7 +102,7 @@ function Dashboard() {
               gap: "25px",
             }}
           >
-                        {items.map((item) => (
+            {items.map((item) => (
               <div
                 key={item.id}
                 style={{
@@ -112,7 +115,7 @@ function Dashboard() {
                 {item.image_url && (
                   <img
                     src={item.image_url}
-                    alt={item.item_name}
+                    alt={item.name}
                     style={{
                       width: "100%",
                       height: "220px",
@@ -128,24 +131,25 @@ function Dashboard() {
                       color: "#2563eb",
                     }}
                   >
-                    {item.item_name}
+                    {item.name}
                   </h2>
-
-                  <p>
-                    <strong>Category:</strong> {item.category}
-                  </p>
 
                   <p>
                     <strong>Quantity:</strong> {item.quantity}
                   </p>
 
                   <p>
-                    <strong>Location:</strong> {item.location}
+                    <strong>Storage:</strong>{" "}
+                    {[item.storage_type, item.storage_name]
+                      .filter(Boolean)
+                      .join(" - ") || "N/A"}
                   </p>
 
                   <p>
-                    <strong>Description:</strong>{" "}
-                    {item.description}
+                    <strong>Location:</strong>{" "}
+                    {[item.building, item.floor, item.room]
+                      .filter(Boolean)
+                      .join(", ") || "N/A"}
                   </p>
 
                   <p>

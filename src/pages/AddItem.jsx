@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { supabase } from "../supabaseClient";
+import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
 
 function AddItem() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: "",
     quantity: "",
@@ -25,8 +29,14 @@ function AddItem() {
     e.preventDefault();
 
     const {
-    data: { user },
+      data: { user },
     } = await supabase.auth.getUser();
+
+    if (!user) {
+      alert("Please log in to add items.");
+      navigate("/login");
+      return;
+    }
 
     let imageUrl = null;
 
@@ -49,8 +59,10 @@ function AddItem() {
       imageUrl = data.publicUrl;
     }
 
+    // Insert item mapped precisely to your Supabase schema
     const { error } = await supabase.from("item").insert([
       {
+        user_id: user.id, // Attach user ID here
         name: formData.name,
         quantity: Number(formData.quantity),
         building: formData.building || null,
@@ -80,108 +92,114 @@ function AddItem() {
     });
 
     setImage(null);
+    navigate("/dashboard");
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
-      <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-lg">
-        <h1 className="text-3xl font-bold text-center mb-6">
-          Add New Item
-        </h1>
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+      <Navbar />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            name="name"
-            placeholder="Item Name"
-            value={formData.name}
-            onChange={handleChange}
-            className="w-full border rounded-lg p-3"
-            required
-          />
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-lg">
+          <h1 className="text-3xl font-bold text-center mb-6">
+            Add New Item
+          </h1>
 
-          <input
-            type="number"
-            name="quantity"
-            placeholder="Quantity"
-            value={formData.quantity}
-            onChange={handleChange}
-            className="w-full border rounded-lg p-3"
-            required
-          />
-
-          <input
-            type="text"
-            name="building"
-            placeholder="Building / House"
-            value={formData.building}
-            onChange={handleChange}
-            className="w-full border rounded-lg p-3"
-          />
-
-          <input
-            type="text"
-            name="floor"
-            placeholder="Floor"
-            value={formData.floor}
-            onChange={handleChange}
-            className="w-full border rounded-lg p-3"
-          />
-
-          <input
-            type="text"
-            name="room"
-            placeholder="Room"
-            value={formData.room}
-            onChange={handleChange}
-            className="w-full border rounded-lg p-3"
-          />
-
-          <select
-            name="storage_type"
-            value={formData.storage_type}
-            onChange={handleChange}
-            className="w-full border rounded-lg p-3"
-          >
-            <option value="">Select Storage Type</option>
-            <option value="Cabinet">Cabinet</option>
-            <option value="Cupboard">Cupboard</option>
-            <option value="Drawer">Drawer</option>
-            <option value="Shelf">Shelf</option>
-            <option value="Desk">Desk</option>
-            <option value="Wardrobe">Wardrobe</option>
-            <option value="Other">Other</option>
-          </select>
-
-          <input
-            type="text"
-            name="storage_name"
-            placeholder="Storage Name"
-            value={formData.storage_name}
-            onChange={handleChange}
-            className="w-full border rounded-lg p-3"
-          />
-
-          <label className="w-full cursor-pointer bg-gray-100 border border-gray-300 rounded-lg p-3 text-center hover:bg-gray-200 transition block">
-            {image ? image.name : "📷 Upload Image"}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+              type="text"
+              name="name"
+              placeholder="Item Name"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full border rounded-lg p-3"
+              required
+            />
 
             <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setImage(e.target.files[0])}
-              className="hidden"
+              type="number"
+              name="quantity"
+              placeholder="Quantity"
+              value={formData.quantity}
+              onChange={handleChange}
+              className="w-full border rounded-lg p-3"
+              required
             />
-          </label>
 
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition"
-          >
-            Save Item
-          </button>
-        </form>
+            <input
+              type="text"
+              name="building"
+              placeholder="Building / House"
+              value={formData.building}
+              onChange={handleChange}
+              className="w-full border rounded-lg p-3"
+            />
+
+            <input
+              type="text"
+              name="floor"
+              placeholder="Floor"
+              value={formData.floor}
+              onChange={handleChange}
+              className="w-full border rounded-lg p-3"
+            />
+
+            <input
+              type="text"
+              name="room"
+              placeholder="Room"
+              value={formData.room}
+              onChange={handleChange}
+              className="w-full border rounded-lg p-3"
+            />
+
+            <select
+              name="storage_type"
+              value={formData.storage_type}
+              onChange={handleChange}
+              className="w-full border rounded-lg p-3"
+            >
+              <option value="">Select Storage Type</option>
+              <option value="Cabinet">Cabinet</option>
+              <option value="Cupboard">Cupboard</option>
+              <option value="Drawer">Drawer</option>
+              <option value="Shelf">Shelf</option>
+              <option value="Desk">Desk</option>
+              <option value="Wardrobe">Wardrobe</option>
+              <option value="Other">Other</option>
+            </select>
+
+            <input
+              type="text"
+              name="storage_name"
+              placeholder="Storage Name"
+              value={formData.storage_name}
+              onChange={handleChange}
+              className="w-full border rounded-lg p-3"
+            />
+
+            <label className="w-full cursor-pointer bg-gray-100 border border-gray-300 rounded-lg p-3 text-center hover:bg-gray-200 transition block">
+              {image ? image.name : "📷 Upload Image"}
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImage(e.target.files[0])}
+                className="hidden"
+              />
+            </label>
+
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition"
+            >
+              Save Item
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
 }
+
 export default AddItem;
