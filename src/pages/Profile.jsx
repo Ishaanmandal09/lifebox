@@ -24,18 +24,18 @@ function Profile() {
 
       setUser(user);
 
+      // Use .maybeSingle() so it returns an object instead of an array
       const { data: profileData, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id);
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
 
-        console.log(profileData);
-        console.log(error);
+      if (error) {
+        console.error("Profile Fetch Error:", error.message);
+      }
 
-       console.log("Auth User ID:", user.id);
-        console.log("Profile Data:", profileData);
-
-        setProfile(profileData);
+      setProfile(profileData);
 
       const { count } = await supabase
         .from("item")
@@ -52,6 +52,13 @@ function Profile() {
     await supabase.auth.signOut();
     navigate("/");
   };
+
+  // Fallback order: profile table full_name -> auth user_metadata -> "Not Set"
+  const displayName =
+    profile?.full_name ||
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    "Not Set";
 
   return (
     <>
@@ -86,18 +93,15 @@ function Profile() {
           </h2>
 
           <p>
-            <strong>Name:</strong>{" "}
-            {profile?.full_name || "Not Set"}
+            <strong>Name:</strong> {displayName}
           </p>
 
           <p style={{ marginTop: "15px" }}>
-            <strong>Email:</strong>{" "}
-            {user?.email}
+            <strong>Email:</strong> {user?.email}
           </p>
 
           <p style={{ marginTop: "15px" }}>
-            <strong>Items Listed:</strong>{" "}
-            {itemCount}
+            <strong>Items Listed:</strong> {itemCount}
           </p>
 
           <button
